@@ -1,5 +1,10 @@
-// stores.js
 import { writable } from 'svelte/store';
 
-// Create a writable store to manage authentication state
 export const isAuthenticated = writable(false);
+export const authToken = writable(null);
+
+// Helper to check if token exists in localStorage on load
+if (localStorage.getItem('authToken')) {
+    isAuthenticated.set(true);
+    authToken.set(localStorage.getItem('authToken'));
+}

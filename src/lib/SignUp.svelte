@@ -1,9 +1,10 @@
 <script>
-	import { Link } from 'svelte-routing'; // For navigation
-	import logo from '/src/assets/Logo.png'; // Logo path
-	import googleIcon from '/src/assets/google-icon.png'; // Correct path for Google icon
+	import { Link } from 'svelte-routing';
+	import logo from '/src/assets/Logo.png';
+	import googleIcon from '/src/assets/google-icon.png';
 	import instagramIcon from '/src/assets/Instagram-icon.png';
 	import facebookIcon from '/src/assets/facebook-icon.png';
+	import { navigate } from 'svelte-routing';
 
 	let username = '';
 	let birthDay = '';
@@ -14,11 +15,10 @@
 	let confirmPassword = '';
 	let errorMessage = '';
 
-	function handleSignUp() {
-		// Combine the day, month, and year into a single date string or Date object
-		const birthDate = `${birthYear}-${birthMonth}-${birthDay}`; // Format as YYYY-MM-DD
+	// API call to handle the signup process
+	async function handleSignUp() {
+		const birthDate = `${birthYear}-${birthMonth}-${birthDay}`;
 
-		// Basic form validation
 		if (!username || !birthDate || !email || !password || !confirmPassword) {
 			errorMessage = 'All fields are required.';
 			return;
@@ -29,13 +29,28 @@
 			return;
 		}
 
-		// Implement sign-up logic here
-		console.log('Sign-up details:', { username, birthDate, email, password });
-		// Reset error message if sign-up is successful
-		errorMessage = '';
+		try {
+			const response = await fetch('http://localhost:3000/api/signup', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, birthDate, email, password })
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				// Sign-up successful
+				errorMessage = '';
+				navigate('/login');
+			} else {
+				errorMessage = data.message || 'Sign-up failed. Please try again.';
+			}
+		} catch (error) {
+			errorMessage = 'An error occurred during sign-up. Please try again later.';
+		}
 	}
 
-	// Generate options for day, month, and year
+	// Options for day, month, and year
 	const days = Array.from({ length: 31 }, (_, i) => i + 1);
 	const months = [
 		{ value: '01', name: 'January' },
@@ -49,7 +64,7 @@
 		{ value: '09', name: 'September' },
 		{ value: '10', name: 'October' },
 		{ value: '11', name: 'November' },
-		{ value: '12', name: 'December' },
+		{ value: '12', name: 'December' }
 	];
 	const currentYear = new Date().getFullYear();
 	const years = [];
@@ -59,37 +74,42 @@
 </script>
 
 <div class="sign-up-page">
-	<!-- Enlarged Logo -->
+	<!-- Logo -->
 	<Link to="/">
 		<img src={logo} alt="Logo" class="logo" />
 	</Link>
 
-	<!-- Sign-up form container -->
+	<!-- Sign-up form -->
 	<div class="sign-up-container">
 		<h2>Sign Up</h2>
 
 		<form class="sign-up-form" on:submit|preventDefault={handleSignUp}>
 			<label for="username">Username</label>
-			<input type="text" id="username" bind:value={username} placeholder="Username" required />
+			<input
+				type="text"
+				id="username"
+				bind:value={username}
+				placeholder="Username"
+				required
+			/>
 
-			<!-- BirthDate Selectors -->
-			<label>BirthDate</label>
+			<label for="birthDay">BirthDate</label>
 			<div class="birthdate-selectors">
-				<select bind:value={birthDay} required>
+				<select id="birthDay" bind:value={birthDay} required>
 					<option value="" disabled selected>Day</option>
 					{#each days as day}
 						<option value={day < 10 ? `0${day}` : day}>{day}</option>
 					{/each}
 				</select>
 
-				<select bind:value={birthMonth} required>
+				<select id="birthMonth" bind:value={birthMonth} required>
 					<option value="" disabled selected>Month</option>
 					{#each months as month}
 						<option value={month.value}>{month.name}</option>
 					{/each}
 				</select>
 
-				<select bind:value={birthYear} required>
+				<select id="birthYear" bind:value={birthYear} required>
 					<option value="" disabled selected>Year</option>
 					{#each years as year}
 						<option value={year}>{year}</option>
@@ -98,15 +118,32 @@
 			</div>
 
 			<label for="email">Email</label>
-			<input type="email" id="email" bind:value={email} placeholder="username@gmail.com" required />
+			<input
+				type="email"
+				id="email"
+				bind:value={email}
+				placeholder="username@gmail.com"
+				required
+			/>
 
 			<label for="password">Password</label>
-			<input type="password" id="password" bind:value={password} placeholder="Password" required />
+			<input
+				type="password"
+				id="password"
+				bind:value={password}
+				placeholder="Password"
+				required
+			/>
 
 			<label for="confirmPassword">Confirm Password</label>
-			<input type="password" id="confirmPassword" bind:value={confirmPassword} placeholder="Confirm Password" required />
+			<input
+				type="password"
+				id="confirmPassword"
+				bind:value={confirmPassword}
+				placeholder="Confirm Password"
+				required
+			/>
 
-			<!-- Display error message if any -->
 			{#if errorMessage}
 				<p class="error-message">{errorMessage}</p>
 			{/if}
@@ -115,7 +152,6 @@
 
 			<p class="or-continue">or continue with</p>
 
-			<!-- Social sign-up buttons with icons -->
 			<div class="social-sign-up">
 				<button type="button" class="social-btn google-btn">
 					<img src={googleIcon} alt="Google" />
@@ -132,7 +168,7 @@
 </div>
 
 <style>
-	/* Full page background */
+	/* Background and layout styling */
 	.sign-up-page {
 		position: relative;
 		background-color: black;
@@ -144,7 +180,6 @@
 		align-items: center;
 	}
 
-	/* Silk overlay on top of the black background */
 	.sign-up-page::before {
 		content: '';
 		position: absolute;
@@ -159,16 +194,14 @@
 		z-index: 1;
 	}
 
-	/* Enlarged logo */
 	.logo {
-		width: 200px; /* Increased size */
+		width: 200px;
 		margin-bottom: 1.5rem;
 		position: relative;
 		z-index: 2;
 		cursor: pointer;
 	}
 
-	/* Sign-up form container */
 	.sign-up-container {
 		position: relative;
 		background: linear-gradient(135deg, #1b1b1b, #333);
@@ -182,7 +215,6 @@
 		max-width: 400px;
 	}
 
-	/* Form elements */
 	.sign-up-form label {
 		display: block;
 		margin-bottom: 0.5rem;
@@ -202,11 +234,6 @@
 		color: white;
 	}
 
-	.sign-up-form input::placeholder,
-	.sign-up-form select {
-		color: #ddd;
-	}
-
 	/* Adjust birthdate-selectors styling */
 	.birthdate-selectors {
 		display: flex;
@@ -214,24 +241,33 @@
 		margin-bottom: 0.8rem;
 	}
 
+	/* Styling for individual select elements within the birthdate-selectors */
 	.birthdate-selectors select {
-		flex: 1;
+		flex: 1; /* Ensure each select takes equal space */
 		padding: 0.8rem;
 		border: none;
 		border-radius: 8px;
-		background-color: rgba(255, 255, 255, 0.2);
-		color: white;
+		background-color: rgba(255, 255, 255, 0.2); /* Adjust background color */
+		color: white; /* Text color */
 		appearance: none; /* Remove default arrow in some browsers */
+		text-align: center; /* Center-align text in dropdown */
 	}
 
+	/* Dropdown option background and text color */
 	.birthdate-selectors select option {
-		background-color: #1b1b1b;
-		color: white;
+		background-color: #333; /* Darker background color for options */
+		color: white; /* Text color */
+	}
+
+	.error-message {
+		color: #ff6363;
+		font-size: 0.9rem;
+		margin-top: 0.5rem;
 	}
 
 	.sign-up-btn {
 		width: 100%;
-		background-color: #DBF77E;
+		background-color: #dbf77e;
 		color: black;
 		font-weight: 600;
 		padding: 0.8rem;
@@ -240,11 +276,13 @@
 		cursor: pointer;
 		font-size: 1rem;
 		margin-top: 1rem;
-		transition: background-color 0.3s ease, transform 0.3s ease;
+		transition:
+			background-color 0.3s ease,
+			transform 0.3s ease;
 	}
 
 	.sign-up-btn:hover {
-		background-color: #C7E96B;
+		background-color: #c7e96b;
 		transform: translateY(-2px);
 	}
 
@@ -253,7 +291,6 @@
 		font-size: 0.9rem;
 	}
 
-	/* Social sign-up buttons */
 	.social-sign-up {
 		display: flex;
 		justify-content: center;
@@ -270,23 +307,13 @@
 		justify-content: center;
 		align-items: center;
 		background-color: white;
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
 	}
 
 	.social-btn img {
 		width: 32px;
 		height: 32px;
-	}
-
-	.social-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
-	}
-
-	/* Error Message Styling */
-	.error-message {
-		color: #ff6363;
-		font-size: 0.9rem;
-		margin-top: 0.5rem;
 	}
 </style>

@@ -6,14 +6,14 @@
 	import instagramIcon from '/src/assets/Instagram-icon.png';
 	import facebookIcon from '/src/assets/facebook-icon.png';
 
-	import { isAuthenticated } from '../lib/stores.js'; // Adjust the path to your store
+	import { isAuthenticated, authToken } from '../lib/stores.js'; // Adjust the path to your store
 	import { navigate } from 'svelte-routing';
 
 	let email = '';
 	let password = '';
 	let errorMessage = '';
 
-	// Basic form validation
+	// Form validation function
 	function validateForm() {
 		if (!email || !password) {
 			errorMessage = 'Email and Password are required.';
@@ -27,9 +27,7 @@
 		errorMessage = '';
 		if (!validateForm()) return;
 
-		// Mock API call to demonstrate login logic
 		try {
-			// Replace this with your API request for login
 			const response = await fetch('http://localhost:3000/api/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -41,7 +39,8 @@
 			if (response.ok) {
 				// Login successful
 				isAuthenticated.set(true); // Update the authentication state
-				localStorage.setItem('authToken', data.token); // Store token in local storage
+				authToken.set(data.token); // Store the token in Svelte store
+				localStorage.setItem('authToken', data.token); // Save token in local storage for persistence
 				navigate('/'); // Redirect to home or dashboard
 			} else {
 				errorMessage = data.message || 'Login failed. Please check your credentials.';
