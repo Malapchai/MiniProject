@@ -1,0 +1,72 @@
+/* Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap');
+
+/* Global Reset */
+html,
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Montserrat', sans-serif;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+}
+
+/* Universal box-sizing to avoid padding issues */
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 600;
+	margin: 0;
+}
+
+p {
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 400;
+	line-height: 1.6;
+}
+
+/* Buttons */
+button {
+	font-family: 'Montserrat', sans-serif;
+	background-color: lime;
+	color: black;
+	padding: 1rem 2rem;
+	border: none;
+	cursor: pointer;
+	font-size: 1rem;
+}
+
+/* Colors Variables */
+:root {
+	--primary-color: lime;
+	--secondary-color: #000;
+	--accent-color: #ffadad;
+	--background-color: #000;
+	--text-color: white;
+}
+
+/* Background */
+body {
+	background-color: var(--background-color);
+	color: var(--text-color);
+}
+
+/* Other Design Adjustments */
+.container {
+	max-width: 1700px;
+	margin: 0 auto;
+	padding: 1rem;
+}

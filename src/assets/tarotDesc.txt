@@ -1,0 +1,57 @@
+[
+    {
+      "_id": {
+        "$oid": "671a3115571d5293f1bd4876"
+      },
+      "name": "The Emperor",
+      "upright_description": "Upright : The Emperor card symbolizes authority, structure, and disciplined leadership, encouraging strategic thinking and rational decisions for success. In love, it suggests traditional relationships and using logic over emotions. In career, it emphasizes creating structure, discipline, and mentoring. Financially, it calls for careful money management and discipline.",
+      "reverse_description": "Reverse : The reversed Emperor signifies abuse of power, lack of control, and rigidity. It can indicate feeling dominated by an overbearing figure or struggling with authority. In love, it points to power struggles and possessiveness; in career, challenges with bureaucracy or poor leadership; and in finances, a lack of discipline and financial instability.",
+      "upright_keywords": "stability, structure, protection, authority, control, practicality, focus, discipline",
+      "reverse_keywords": "tyrant, domineering, rigid, stubborn, lack of discipline, recklessness",
+      "image": "/assets/cards/m04.jpg"
+    },
+    {
+      "_id": {
+        "$oid": "671a3115571d5293f1bd4877"
+      },
+      "name": "The Fool",
+      "upright_description": "Upright : The Fool card represents fresh starts, freedom, and limitless possibilities. It encourages embracing new adventures with optimism. In love, it suggests new, fun relationships; in career, bold opportunities; and in finances, spontaneous spending and financial chances.",
+      "reverse_description": "Reverse : The Reversed Fool highlights recklessness, ignoring consequences, and living impulsively. It warns you to be cautious and more aware of your actions to avoid risky situations. In love, it suggests a lack of commitment; in career, a dull job or reckless choices; and in finances, a need to be careful with spending and investments.",
+      "upright_keywords": "beginnings, freedom, innocence, originality, adventure, idealism, spontaneity",
+      "reverse_keywords": "reckless, careless, distracted, naive, foolish, gullible, stale, dull",
+      "image": "/assets/cards/m00.jpg"
+    },
+    {
+        "_id": {
+          "$oid": "671a3115571d5293f1bd4878"
+        },
+        "name": "The Magician",
+        "upright_description": "Upright : The Magician card symbolizes willpower, the ability to manifest desires, and the connection between inner and outer worlds. It encourages tapping into your full potential and taking decisive action. In love, it means creating opportunities and being proactive; in career, seizing chances with determination; and in finances, pursuing opportunities using your skills.",
+        "reverse_description": "Reverse : The reversed Magician signifies deception, manipulation, and the misuse of power. It warns of illusions and the potential for selfish motives, either from others or within yourself. In love, it points to romantic illusions or trickery; in career, it suggests wasted potential and workplace deceit; and in finances, missed opportunities and failing to utilize skills for gain.",
+        "upright_keywords": "willpower, desire, being resourceful,, skill, ability, concentration, manifestation",
+        "reverse_keywords": "manipulation, cunning, trickery, wasted talent, illusion, deception",
+        "image": "/assets/cards/m01.jpg"
+      },
+      {
+        "_id": {
+          "$oid": "671a3115571d5293f1bd4879"
+        },
+        "name": "The High Priestess",
+        "upright_description": "Upright : The High Priestess card represents inner knowledge, intuition, and spiritual awareness. It urges you to trust your intuition over logic and explore the mysteries within. In love, it suggests patience and hidden passion; in career, it points to guidance, education, and trusting instincts; and in finances, it emphasizes maintaining privacy about your financial matters.",
+        "reverse_description": "Reverse : The reversed High Priestess suggests a disconnection from intuition and inner guidance. It indicates confusion and the need to explore a more authentic path aligned with your inner values. In love, it signals ignoring your instincts and hiding your true self; in career, it points to isolation, missing details, and rejecting intuition; and in finances, it warns of incomplete information and not seeing the full picture.",
+        "upright_keywords": "unconscious, intuition, mystery, spirituality, higher power, inner voice",
+        "reverse_keywords": "repressed intuition, hidden motives, superficiality, confusion, cognitive dissonance",
+        "image": "/assets/cards/m02.jpg"
+      },
+      {
+        "_id": {
+          "$oid": "671a3115571d5293f1bd4880"
+        },
+        "name": "The Empress",
+        "upright_description": "Upright : The Empress card represents femininity, creativity, nurturing, and self-care. It encourages connecting with beauty, expressing oneself, and embracing joy. This card often symbolizes fertility, motherhood, or the birth of new ideas and projects that promise success. In love, it suggests a nurturing, supportive relationship; in career, a creative and caring atmosphere; and in finances, comfort, generosity, and sharing wealth.",
+        "reverse_description": "Reverse : The reversed Empress suggests neglecting your own needs by overfocusing on others, leading to a loss of personal strength. It may also indicate over-reliance on others. In love, it points to jealousy and feeling stuck; in career, insecurity and stagnation; and in finances, feeling unstable despite security.",
+        "upright_keywords": "divine feminine, sensuality, fertility, nurturing, creativity, beauty, abundance, nature",
+        "reverse_keywords": "insecurity, overbearing, negligence, smothering, lack of growth, lack of progress",
+        "image": "/assets/cards/m03.jpg"
+      }
+  ]
