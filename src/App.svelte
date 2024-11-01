@@ -16,6 +16,7 @@
 	import AboutUs from './lib/AboutUs.svelte';
 	import BlogDetail from './lib/BlogDetail.svelte';
 	import BlogList from './lib/BlogList.svelte';
+	import PaymentSuccess from './lib/PaymentSuccess.svelte';
 	import { isAuthenticated } from './lib/stores.js';
 
 	onMount(() => {
@@ -46,5 +47,6 @@
 	<Route path="/wat-page-c" component={requireAuth(WatCPage)} />
 	<Route path="/about" component={AboutUs} />
 	<Route path="/blog/:id" component={BlogDetail} />
-	<Route path="/blogs" component={BlogList} />	
+	<Route path="/blogs" component={BlogList} />
+	<Route path="/payment-success" component={PaymentSuccess} />
 </Router>

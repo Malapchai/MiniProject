@@ -71,6 +71,24 @@
 		currentPage = tab;
 	}
 
+	// Handle checkout redirection
+	async function handleCheckout() {
+		try {
+			const response = await fetch('http://localhost:3000/api/create-checkout-session', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			const data = await response.json();
+			if (data.url) {
+				window.location.href = data.url; // Redirect to Stripe checkout page
+			}
+		} catch (error) {
+			console.error('Failed to initiate checkout:', error);
+		}
+	}
+
 	// Logout function
 	function handleLogout() {
 		localStorage.removeItem('authToken');
@@ -140,13 +158,16 @@
 
 		{#if currentPage === 'membership'}
 			<h2 class="membership-title">Membership</h2>
+            {#if errorMessage}
+				<div class="error-message">{errorMessage}</div>
+			{/if}
 			<div class="membership-card-container">
 				<div class="membership-card">
 					<span class="new-member-badge">New Member</span>
 					<h3 class="membership-plan-title">HOROSCAPE Explorer</h3>
 					<p class="membership-plan-subtitle">Premium Membership</p>
 					<p class="membership-price">$7.99/month</p>
-					<button class="subscribe-btn">Subscribe Now</button>
+					<button class="subscribe-btn" on:click={handleCheckout}>Subscribe Now</button>
 				</div>
 			</div>
 		{/if}
@@ -163,6 +184,16 @@
 </div>
 
 <style>
+
+	.error-message {
+		color: #ff5c5c;
+		background-color: rgba(255, 0, 0, 0.1);
+		padding: 1rem;
+		border-radius: 8px;
+		text-align: center;
+		margin-bottom: 1.5rem;
+	}
+
 	/* Profile Page Layout */
 	.profile-page {
 		display: flex;

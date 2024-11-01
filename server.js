@@ -5,6 +5,9 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { OAuth2Client } from 'google-auth-library';
+import { createCheckoutSession } from './src/routes/api/create-checkout-session.js';
+import Stripe from 'stripe';
+const stripe = new Stripe(process.env.SECRET_STRIPE_KEY, {apiVersion: "2024-09-30.acacia"});
 
 // Load environment variables
 dotenv.config();
@@ -206,6 +209,9 @@ const chichiASchema = new mongoose.Schema({
 });
 // @ts-ignore
 const ChichiA = mongoose.model('chichiA', chichiASchema);
+
+// === Payment Section === //
+app.post('/api/create-checkout-session', createCheckoutSession);
 
 // === Tarot Cards APIs === //
 

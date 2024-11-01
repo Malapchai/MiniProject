@@ -35,23 +35,15 @@
 
 <NavBarLoggedIn />
 <div class="tarot-page">
-	<!-- Tarot Page Content -->
 	<div class="tarot-content">
-		<!-- Main Title -->
 		<h1 class="title">Tarot</h1>
-		<!-- Sub-title -->
 		<p class="sub-title">Discover What's Your Mind Saying...</p>
-
-		<!-- Tarot Cards Section -->
 		<div class="tarot-cards">
-			<!-- Tarot Card 1: 3 Cards - Mind, Body, Spirit -->
 			<button class="tarot-card" on:click={() => navigate('/three-card-spread')}>
                 <img src="/src/assets/node.png" alt="Card Icon" class="card-image" />
                 <h3>3 Cards</h3>
                 <p>Mind, Body, Spirit Spread</p>
             </button>
-
-			<!-- Tarot Card 2: 5 Cards Spread -->
 			<button class="tarot-card" on:click={() => navigate('/five-card-spread')}>
                 <img src="/src/assets/node.png" alt="Card Icon" class="card-image" />
                 <h3>5 Cards</h3>

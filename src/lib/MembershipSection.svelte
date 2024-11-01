@@ -1,8 +1,19 @@
+<script>
+	import { createEventDispatcher } from 'svelte';
+
+	// Dispatch an event to handle the button click
+	const dispatch = createEventDispatcher();
+
+	function handleJoinMembershipClick() {
+		dispatch('joinMembership'); // Dispatch joinMembership event when button is clicked
+	}
+</script>
+
 <section class="membership">
 	<div class="content">
 		<h2>Join our <span class="highlight">membership</span> for daily bits of <span class="highlight">astrology</span></h2>
 		<p>We provide the essentials for your astrology needs</p>
-		<button class="join-btn">Join Membership</button>
+		<button class="join-btn" on:click={handleJoinMembershipClick}>Join Membership</button>
 	</div>
 </section>
 

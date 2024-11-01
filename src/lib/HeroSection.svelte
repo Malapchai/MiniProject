@@ -1,10 +1,20 @@
+<!-- HeroSection.svelte -->
+<script>
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+
+    function handleJoinNowClick() {
+        dispatch('joinNow'); // Dispatch the event when the button is clicked
+    }
+</script>
+
 <section class="hero">
 	<img src="src/assets/silk.png" alt="Background Overlay" class="background-image" />
 	<div class="content">
         <h1>Welcome to...</h1>
 		<img src="./src/assets/Logo.png" alt="HOROSCAPE Logo" class="hero-logo" />
 		<p class="hero-description">Let Tarot And Chi-Chi Sticks guide you through the big and small things in life</p>
-		<button class="join-btn">JOIN NOW</button>
+		<button class="join-btn" on:click={handleJoinNowClick}>Join Now</button>
 	</div>
 </section>
 
