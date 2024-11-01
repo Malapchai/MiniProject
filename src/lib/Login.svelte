@@ -1,17 +1,62 @@
 <script>
-	// Import necessary assets and modules
 	import { Link } from 'svelte-routing';
-	import logo from '/src/assets/Logo.png'; // Assuming the logo path is correct
+	import logo from '/src/assets/Logo.png';
 	import googleIcon from '/src/assets/google-icon.png';
 	import instagramIcon from '/src/assets/Instagram-icon.png';
 	import facebookIcon from '/src/assets/facebook-icon.png';
 
-	import { isAuthenticated, authToken } from '../lib/stores.js'; // Adjust the path to your store
+	import { isAuthenticated, authToken } from '../lib/stores.js';
 	import { navigate } from 'svelte-routing';
+	import { onMount } from 'svelte';
 
+	let google;
 	let email = '';
 	let password = '';
 	let errorMessage = '';
+	const GOOGLE_CLIENT_ID = '157935331614-4ou1p1gpiue91v4oh06rgn1a3dbm2s67.apps.googleusercontent.com';
+
+	// Google Sign-In initialization
+	onMount(() => {
+		const script = document.createElement('script');
+		script.src = 'https://accounts.google.com/gsi/client';
+		script.async = true;
+		script.defer = true;
+		document.body.appendChild(script);
+
+		script.onload = () => {
+			// Ensure `google` is accessible globally
+			// @ts-ignore
+			if (window.google && window.google.accounts) {
+				// @ts-ignore
+				google = window.google;
+				google.accounts.id.initialize({
+					client_id: GOOGLE_CLIENT_ID,
+					callback: handleCredentialResponse
+				});
+			} else {
+				console.error('Google API did not load correctly');
+			}
+		};
+	});
+
+	// Handle Google Sign-In response
+	function handleCredentialResponse(response) {
+		console.log('Encoded JWT ID token: ' + response.credential);
+		authToken.set(response.credential);
+		isAuthenticated.set(true);
+		localStorage.setItem('authToken', response.credential);
+		navigate('/');
+	}
+
+	// Trigger Google Sign-In when Google logo button is clicked
+	function triggerGoogleSignIn() {
+		// Check if `google` and `google.accounts` are available
+		if (google && google.accounts && google.accounts.id) {
+			google.accounts.id.prompt();
+		} else {
+			console.error('Google API not loaded yet. Please try again later.');
+		}
+	}
 
 	// Form validation function
 	function validateForm() {
@@ -33,15 +78,14 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, password })
 			});
-			
+
 			const data = await response.json();
 
 			if (response.ok) {
-				// Login successful
-				isAuthenticated.set(true); // Update the authentication state
-				authToken.set(data.token); // Store the token in Svelte store
-				localStorage.setItem('authToken', data.token); // Save token in local storage for persistence
-				navigate('/'); // Redirect to home or dashboard
+				isAuthenticated.set(true);
+				authToken.set(data.token);
+				localStorage.setItem('authToken', data.token);
+				navigate('/');
 			} else {
 				errorMessage = data.message || 'Login failed. Please check your credentials.';
 			}
@@ -51,43 +95,44 @@
 	}
 </script>
 
-<!-- Login Page Container -->
 <div class="login-page">
-	<!-- Logo Section -->
 	<Link to="/">
 		<img src={logo} alt="Logo" class="logo" />
 	</Link>
 
-	<!-- Login Form Container -->
 	<div class="login-container">
 		<h2>Login</h2>
 
 		<form class="login-form" on:submit|preventDefault={handleLogin}>
-			<!-- Email Input -->
 			<label for="email">Email</label>
-			<input type="email" id="email" bind:value={email} placeholder="username@gmail.com" required />
+			<input
+				type="email"
+				id="email"
+				bind:value={email}
+				placeholder="username@gmail.com"
+				required
+			/>
 
-			<!-- Password Input -->
 			<label for="password">Password</label>
-			<input type="password" id="password" bind:value={password} placeholder="Password" required />
+			<input
+				type="password"
+				id="password"
+				bind:value={password}
+				placeholder="Password"
+				required
+			/>
 
-			<!-- Forgot Password Link -->
 			<a href="#" class="forgot-password">Forgot Password?</a>
-
-			<!-- Submit Button -->
 			<button type="submit" class="login-btn">Sign in</button>
 
-			<!-- Display error message if any -->
 			{#if errorMessage}
 				<p class="error-message">{errorMessage}</p>
 			{/if}
 
-			<!-- Separator -->
 			<p class="or-continue">or continue with</p>
 
-			<!-- Social Login Buttons -->
 			<div class="social-login">
-				<button class="social-btn google-btn">
+				<button class="social-btn google-btn" on:click={triggerGoogleSignIn}>
 					<img src={googleIcon} alt="Google" />
 				</button>
 				<button class="social-btn instagram-btn">
@@ -98,7 +143,6 @@
 				</button>
 			</div>
 
-			<!-- Sign-Up Redirect -->
 			<p class="sign-up">
 				Don't have an account yet? <Link to="/signup">Sign Up</Link>
 			</p>
@@ -108,7 +152,8 @@
 
 <style>
 	/* General Styling Reset */
-	html, body {
+	html,
+	body {
 		margin: 0;
 		padding: 0;
 		height: 100%;
@@ -222,7 +267,9 @@
 		cursor: pointer;
 		font-size: 1rem;
 		margin-top: 1rem;
-		transition: background-color 0.3s ease, transform 0.3s ease;
+		transition:
+			background-color 0.3s ease,
+			transform 0.3s ease;
 	}
 
 	.login-btn:hover {
@@ -252,7 +299,9 @@
 		justify-content: center;
 		align-items: center;
 		background-color: white;
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
 	}
 
 	.social-btn img {

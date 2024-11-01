@@ -2,8 +2,19 @@
 	import NavBarLoggedIn from './NavBarLoggedIn.svelte'; // Import the logged-in NavBar
 	import { isAuthenticated } from 'C:\\Users\\User\\Pictures\\Document\\svelte-course\\src\\lib\\stores.js'; // Import store
 	import { navigate } from 'svelte-routing'; // Navigation
+	import { onMount } from 'svelte'; // Lifecycle function
 
 	let userLoggedIn = false;
+
+	onMount(() => {
+        let loggedIn;
+        isAuthenticated.subscribe(value => loggedIn = value);
+
+        // If not authenticated, navigate to login page
+        if (!loggedIn) {
+            navigate('/login');
+        }
+    });
 
 	// Subscribe to the store directly
 	$: {

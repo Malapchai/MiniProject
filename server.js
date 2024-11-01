@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 
 // Load environment variables
 dotenv.config();
@@ -11,7 +12,10 @@ console.log('MONGODB_URI:', process.env.MONGODB_URI);
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://fa6a-2403-6200-88a0-db33-45ae-9478-ded2-84d9.ngrok-free.app'],
+    credentials: true
+}));
 
 // Connect to MongoDB
 mongoose
@@ -39,100 +43,150 @@ mongoose
 // === Mongoose Schemas & Models === //
 // User Schema & Model
 const userSchema = new mongoose.Schema({
-	username: String,
-	email: String,
-	password: String,
-	birthDate: String
+    username: String,
+    email: { type: String, unique: true, required: true },
+    password: String,
+    birthDate: String,
+    googleId: String,
+    picture: String,
+    package: { type: String, default: "HOROSCAPE FREE" }
 });
 const User = mongoose.model('User', userSchema, 'User');
 
-// Utility functions for JWT
+// Google OAuth2 Client
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Utility Functions
 function generateToken(user) {
-	return jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, {
-		expiresIn: '1h'
-	});
+    return jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
 }
 
-// Hash passwords with bcrypt
+async function verifyToken(token) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID
+    });
+    return ticket.getPayload();
+}
+
 async function hashPassword(password) {
-	return await bcrypt.hash(password, 10);
+    return await bcrypt.hash(password, 10);
 }
 
 async function comparePassword(plainPassword, hashedPassword) {
-	return await bcrypt.compare(plainPassword, hashedPassword);
+    return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
+// Middleware for JWT Authentication
 function authenticateToken(req, res, next) {
-	const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
-	if (!token) return res.sendStatus(401); // Unauthorized
+    const token = req.headers['authorization']?.split(' ')[1];
+    console.log('Token received in authenticateToken:', token);
 
-	jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-		if (err) return res.sendStatus(403); // Forbidden
-		req.user = user; // Attach user info from token
-		next();
-	});
+    if (!token) return res.status(401).json({ message: 'No token provided' });
+
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            console.error('JWT verification error:', err);
+            return res.status(403).json({ message: 'Token verification failed', error: err.message });
+        }
+        req.user = user;
+        next();
+    });
 }
 
-// Signup Route
-// @ts-ignore
+// === API Endpoints === //
+
+// Google Login
+app.post('/api/google-login', async (req, res) => {
+    const { token } = req.body;
+    try {
+        const payload = await verifyToken(token);
+        let user = await User.findOne({ googleId: payload.sub });
+
+        if (!user) {
+            user = await User.create({
+                googleId: payload.sub,
+                email: payload.email,
+                username: payload.name,
+                picture: payload.picture
+            });
+        }
+
+        const appToken = generateToken(user);
+        res.json({ token: appToken, user });
+    } catch (error) {
+        console.error('Error verifying Google token:', error);
+        res.status(401).json({ message: 'Invalid Google token' });
+    }
+});
+
+// Signup
+//@ts-ignore
 app.post('/api/signup', async (req, res) => {
-	const { username, email, password, birthDate } = req.body;
+    const { username, email, password, birthDate } = req.body;
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ message: 'Email already in use' });
 
-	try {
-		const existingUser = await User.findOne({ email });
-		if (existingUser) {
-			return res.status(400).json({ message: 'Email already in use' });
-		}
+        const hashedPassword = await hashPassword(password);
+        const user = new User({ username, email, password: hashedPassword, birthDate });
+        await user.save();
 
-		const hashedPassword = await hashPassword(password);
-		const user = new User({ username, email, password: hashedPassword, birthDate });
-		await user.save();
-		console.log('New user created:', user);
-
-		res.status(201).json({ message: 'User created successfully' });
-	} catch (error) {
-		console.error('Error creating user:', error);
-		res.status(500).json({ message: 'Error creating user', error });
-	}
+        console.log('New user created:', user);
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ message: 'Error creating user', error });
+    }
 });
 
-// Login Route
-// @ts-ignore
+// Login
+//@ts-ignore
 app.post('/api/login', async (req, res) => {
-	const { email, password } = req.body;
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user || !(await comparePassword(password, user.password))) {
+            return res.status(400).json({ message: 'Invalid email or password' });
+        }
 
-	try {
-		// Find the user by email
-		const user = await User.findOne({ email });
-		if (!user) {
-			return res.status(400).json({ message: 'Invalid email or password' });
-		}
-
-		// Check password
-		const isMatch = await bcrypt.compare(password, user.password);
-		if (!isMatch) {
-			return res.status(400).json({ message: 'Invalid email or password' });
-		}
-
-		// Generate a JWT
-		const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-		res.status(200).json({ token, message: 'Login successful', username: user.username });
-	} catch (error) {
-		console.error('Error logging in user:', error);
-		res.status(500).json({ message: 'Error logging in', error });
-	}
+        const token = generateToken(user);
+        res.status(200).json({ token, message: 'Login successful', username: user.username });
+    } catch (error) {
+        console.error('Error logging in user:', error);
+        res.status(500).json({ message: 'Error logging in', error });
+    }
 });
-// Protected Route Example
-// @ts-ignore
-app.get('/api/protected', (req, res) => {
-	const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-	if (!token) return res.status(401).json({ message: 'No token provided' });
 
-	jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-		if (err) return res.status(403).json({ message: 'Invalid token' });
-		res.json({ message: 'Welcome to the protected route', user: decoded });
-	});
+// Profile
+//@ts-ignore
+app.get('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        // @ts-ignore
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: 'User not authenticated' });
+
+        const user = await User.findById(userId).select('username email birthDate googleId');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.json({
+            username: user.username,
+            email: user.email,
+            birthdate: user.birthDate,
+            package: user.package || "HOROSCAPE FREE",
+            isGoogleAccount: !!user.googleId
+        });
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ message: 'Error fetching profile information' });
+    }
+});
+
+// Protected Route Example
+app.get('/api/protected', authenticateToken, (req, res) => {
+    // @ts-ignore
+    res.json({ message: 'This is a protected route.', user: req.user });
 });
 
 // Tarot Cards Schema & Model
@@ -150,11 +204,13 @@ const Card = mongoose.model('cards', cardSchema);
 const chichiASchema = new mongoose.Schema({
 	image: String
 });
+// @ts-ignore
 const ChichiA = mongoose.model('chichiA', chichiASchema);
 
 // === Tarot Cards APIs === //
 
 // API to get a single random tarot card
+// @ts-ignore
 app.get('/api/random-tarot-card', async (req, res) => {
 	try {
 		const count = await Card.countDocuments();
@@ -174,6 +230,7 @@ app.get('/api/random-tarot-card', async (req, res) => {
 });
 
 // API to get three random tarot cards
+// @ts-ignore
 app.get('/api/random-three-tarot-cards', async (req, res) => {
 	try {
 		const randomCards = await Card.aggregate([{ $sample: { size: 3 } }]);
@@ -190,6 +247,7 @@ app.get('/api/random-three-tarot-cards', async (req, res) => {
 });
 
 // API to get five random tarot cards
+// @ts-ignore
 app.get('/api/random-five-tarot-cards', async (req, res) => {
 	try {
 		const randomCards = await Card.aggregate([{ $sample: { size: 5 } }]);
@@ -208,6 +266,7 @@ app.get('/api/random-five-tarot-cards', async (req, res) => {
 // === Chi-Chi Sticks APIs === //
 
 // Chi-Chi Endpoint for Collection A
+// @ts-ignore
 // @ts-ignore
 app.get('/api/random-chichi-a', async (req, res) => {
 	try {
@@ -242,6 +301,7 @@ app.get('/api/random-chichi-a', async (req, res) => {
 });
 
 // @ts-ignore
+// @ts-ignore
 app.get('/api/random-chichi-b', async (req, res) => {
 	try {
 		const db = mongoose.connection.db; // Explicitly get the current database
@@ -275,6 +335,7 @@ app.get('/api/random-chichi-b', async (req, res) => {
 });
 
 // @ts-ignore
+// @ts-ignore
 app.get('/api/random-chichi-c', async (req, res) => {
 	try {
 		const db = mongoose.connection.db; // Explicitly get the current database
@@ -307,6 +368,7 @@ app.get('/api/random-chichi-c', async (req, res) => {
 	}
 });
 
+// @ts-ignore
 app.get('/api/protected', authenticateToken, (req, res) => {
 	res.json({ message: 'This is a protected route.' });
 });

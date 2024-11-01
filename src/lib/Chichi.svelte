@@ -1,11 +1,23 @@
 <script>
 	import NavBarLoggedIn from './NavBarLoggedIn.svelte'; // Import the logged-in NavBar
 	import { navigate } from 'svelte-routing'; // Navigation
+	import { onMount } from 'svelte'; // Lifecycle hook
+	import { isAuthenticated } from '../lib/stores.js';
 
 	// Function to navigate to specific Chi-Chi Stick pages
 	function goToChiChiStick(page) {
 		navigate(page);
 	}
+
+	onMount(() => {
+        let loggedIn;
+        isAuthenticated.subscribe(value => loggedIn = value);
+
+        // If not authenticated, navigate to login page
+        if (!loggedIn) {
+            navigate('/login');
+        }
+    });
 </script>
 
 <NavBarLoggedIn />

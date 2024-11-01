@@ -1,27 +1,45 @@
 <script>
-	import NavBar from './NavBar.svelte';    // Your navigation bar component
-	import HeroSection from './HeroSection.svelte';  // Your hero section component
-	import BlogSection from './BlogSection.svelte';  // Your blog section component
-	import MembershipSection from './MembershipSection.svelte';  // Your membership section component
+	import { isAuthenticated } from '../lib/stores.js';
+	import { onMount } from 'svelte';
+	import NavBarLoggedIn from './NavBarLoggedIn.svelte';
+	import NavBarLoggedOut from './NavBar.svelte';
+	import HeroSection from './HeroSection.svelte';
+	import BlogSection from './BlogSection.svelte';
+	import MembershipSection from './MembershipSection.svelte';
+
+	let isLoggedIn;
+
+	onMount(() => {
+		isAuthenticated.subscribe(value => {
+			isLoggedIn = value;
+		});
+	});
 </script>
 
-<NavBar />
-<HeroSection />
-<BlogSection />
-<MembershipSection />
+<main>
+	{#if isLoggedIn}
+		<NavBarLoggedIn />
+	{:else}
+		<NavBarLoggedOut />
+	{/if}
+	<HeroSection />
+	<BlogSection />
+	<MembershipSection />
+</main>
 
 <style>
-	html,
-	body {
+	/* Global resets and box-sizing */
+	::before,
+	::after {
+		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
-		border: none;
-		width: 100%;
-		height: 100%;
-		box-sizing: border-box;
 	}
 
-	* {
-		box-sizing: inherit;
+	html,
+	body {
+		width: 100%;
+		height: 100%;
+		font-family: sans-serif;
 	}
 </style>
